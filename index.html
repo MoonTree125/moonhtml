@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>不滅神劍：全民市場完美繼承版</title>
+    <title>不滅神劍：創世管理完美版</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
         body { background: #0a0e17; color: #fff; font-family: sans-serif; padding: 15px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; padding-bottom: 30px; }
         
         .stat-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 2px solid #38bdf8; border-radius: 16px; padding: 15px; text-align: center; box-shadow: 0 8px 16px rgba(0,0,0,0.4); }
-        .coin-title { font-size: 14px; color: #38bdf8; letter-spacing: 2px; cursor: pointer; }
+        
+        /* 隱藏的標題觸發按鈕 */
+        .admin-trigger-btn { background: transparent; border: none; color: #38bdf8; font-size: 14px; letter-spacing: 2px; cursor: pointer; width: 100%; padding: 5px 0; font-weight: bold; outline: none; }
+        .admin-trigger-btn:active { opacity: 0.7; }
+        
         .coin-count { font-size: 36px; font-weight: bold; color: #fff; margin: 5px 0; text-shadow: 0 0 12px #38bdf8; font-family: monospace; }
         .weapon-info { font-size: 15px; color: #cbd5e1; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 20px; display: inline-block; margin-top: 5px; }
         
@@ -49,16 +53,20 @@
 <body>
 
 <div class="container">
+    <!-- 計分板 -->
     <div class="stat-card">
-        <div class="coin-title" id="secret-title">GOLDEN COINS</div>
+        <!-- 點擊這裡 10 次觸發隱藏後台 -->
+        <button class="admin-trigger-btn" id="secret-btn">GOLDEN COINS</button>
         <div class="coin-count" id="score-display">0</div>
         <div class="weapon-info" id="weapon-display">🗡️ 裝備：載入中...</div>
         <div style="font-size: 12px; color: #a78bfa; margin-top: 4px;" id="enchant-display">✨ 附魔：無</div>
     </div>
 
+    <!-- 🔮 隱藏版：管理員創世神面板 -->
     <div class="panel admin-panel" id="admin-zone">
         <div class="panel-title" style="color: #f87171;">🔱 創世神管理員控制台 (已解鎖)</div>
         
+        <!-- 1. DIY 武器系統 -->
         <div style="margin-bottom: 12px;">
             <span style="font-size: 12px; color: #fca5a5;">🔨 DIY 修改當前武器等級 (1-50)：</span>
             <div class="input-group">
@@ -67,6 +75,7 @@
             </div>
         </div>
 
+        <!-- 2. 強行附魔 -->
         <div style="margin-bottom: 12px;">
             <span style="font-size: 12px; color: #fca5a5;">✨ 直接指定特殊附魔：</span>
             <select class="admin-select" id="adm-e-select">
@@ -78,6 +87,7 @@
             </select>
         </div>
 
+        <!-- 3. 金幣與礦工修改 -->
         <div style="margin-bottom: 12px;" class="grid-2">
             <div>
                 <span style="font-size: 11px; color: #fca5a5;">💰 變更總金幣：</span>
@@ -90,6 +100,7 @@
         </div>
         <button id="adm-save-btn" style="background: #b91c1c; margin-bottom: 12px;">💾 應用金幣與礦工修改</button>
 
+        <!-- 4. 直接自訂產生交易碼 -->
         <div>
             <span style="font-size: 12px; color: #fca5a5;">📦 創世神武器生成器 (不影響自己)：</span>
             <div class="grid-2" style="margin-top: 4px;">
@@ -100,6 +111,7 @@
         </div>
     </div>
 
+    <!-- 點擊核心區 -->
     <div class="click-area" id="click-zone">
         <div class="svg-sword-container" id="click-btn">
             <svg viewBox="0 0 100 100" width="100%" height="100%" style="transform: rotate(45deg);">
@@ -111,6 +123,7 @@
         </div>
     </div>
 
+    <!-- 鍛造與自動化 -->
     <div class="panel">
         <div class="panel-title">⚙️ 武器鍛造、附魔與自動化</div>
         <div class="grid-2">
@@ -131,8 +144,10 @@
                 <span class="desc">花費 500</span>
             </button>
         </div>
+        <div class="notice-text">💡 轉盤有 1% 機率抽到隱藏第 51 種【全班我最帥】附魔，金幣暴擊 100倍！</div>
     </div>
 
+    <!-- 交易市場 -->
     <div class="panel">
         <div class="panel-title">🏪 班級武器一對一交易市場</div>
         <button style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);" id="pack-btn">📦 打包目前的武器為「交易碼」</button>
@@ -142,6 +157,7 @@
         </div>
     </div>
 
+    <!-- 福利代碼 -->
     <div class="panel">
         <div class="panel-title">🎁 官方新手福利代碼</div>
         <div class="input-group">
@@ -158,7 +174,7 @@
     const KEY_MINER = 'v6_save_miners';
     const KEY_GIFTS = 'v6_save_gifts';
 
-    // 完美繼承舊進度
+    // 完美吸取並繼承你原本的八千萬進度
     if (!localStorage.getItem(KEY_SCORE) && localStorage.getItem('all_score')) {
         localStorage.setItem(KEY_SCORE, localStorage.getItem('all_score'));
         localStorage.setItem(KEY_W_IDX, localStorage.getItem('all_w_idx') || 1);
@@ -172,7 +188,7 @@
     let miners = parseInt(localStorage.getItem(KEY_MINER)) || 0;
     let usedGiftCodes = JSON.parse(localStorage.getItem(KEY_GIFTS)) || [];
 
-    // 50 把武器生成
+    // 50把武器庫
     const weapons = [];
     const prefix = ["新手", "精鋼", "淬火", "黑曜石", "寒冰", "烈焰", "雷霆", "破空", "聖光", "不滅"];
     const wTypes = ["鐵劍", "長劍", "巨劍", "重劍", "太刀", "戰刃", "靈劍", "神劍"];
@@ -186,7 +202,7 @@
         }
     }
 
-    // 52 種附魔生成
+    // 附魔庫
     const enchants = [{name: "無", multiply: 1.0, color: "#fff"}];
     while(enchants.length < 51) {
         let id = enchants.length;
@@ -194,7 +210,7 @@
     }
     enchants.push({name: "🌈 全班我最帥", multiply: 100.0, color: "#f472b6"});
 
-    // DOM 元件
+    // 綁定所有介面元素
     const scoreDisplay = document.getElementById('score-display');
     const weaponDisplay = document.getElementById('weapon-display');
     const enchantDisplay = document.getElementById('enchant-display');
@@ -212,8 +228,8 @@
     const giftInput = document.getElementById('gift-input');
     const giftBtn = document.getElementById('gift-btn');
 
-    // 管理員專用 DOM
-    const secretTitle = document.getElementById('secret-title');
+    // 管理員專用元件
+    const secretBtn = document.getElementById('secret-btn');
     const adminZone = document.getElementById('admin-zone');
     const admWInput = document.getElementById('adm-w-input');
     const admWBtn = document.getElementById('adm-w-btn');
@@ -225,23 +241,22 @@
     const diyE = document.getElementById('diy-e');
     const diyCodeBtn = document.getElementById('diy-code-btn');
 
+    // 🔒 核心修改：點擊 GOLDEN COINS 按鈕 10 下觸發密碼輸入
     let secretClickCount = 0;
-
-    // 隱藏密碼鎖觸發監聽
-    secretTitle.addEventListener('click', () => {
+    secretBtn.addEventListener('click', () => {
         secretClickCount++;
-        if (secretClickCount >= 5) {
+        if (secretClickCount >= 10) {
             secretClickCount = 0;
-            let pwd = prompt("請輸入創世神指令密碼：");
+            let pwd = prompt("請輸入管理員核心密碼：");
             if (pwd === "@denny4096") {
                 adminZone.style.display = "block";
-                // 預填當前數值
                 admCoinInput.value = score;
                 admMinerInput.value = miners;
             }
         }
     });
 
+    // 核心 UI 更新
     function updateUI() {
         scoreDisplay.innerText = Math.floor(score).toLocaleString();
         weaponDisplay.innerText = `🗡️ 裝備：${weapons[weaponIndex - 1].name}`;
@@ -269,6 +284,7 @@
 
         wheelBtn.disabled = (score < 500);
 
+        // 即時存檔
         localStorage.setItem(KEY_SCORE, score);
         localStorage.setItem(KEY_W_IDX, weaponIndex);
         localStorage.setItem(KEY_E_ID, enchantId);
@@ -276,6 +292,7 @@
         localStorage.setItem(KEY_GIFTS, JSON.stringify(usedGiftCodes));
     }
 
+    // 點擊神劍賺錢邏輯
     function handleCoreClick(clientX, clientY) {
         let totalPower = Math.floor(weapons[weaponIndex - 1].power * enchants[enchantId].multiply);
         score += totalPower;
@@ -302,6 +319,7 @@
         handleCoreClick(e.clientX, e.clientY);
     });
 
+    // 升級武器
     upgradeBtn.addEventListener('click', () => {
         let upgradeCost = weaponIndex * 60;
         if (score >= upgradeCost && weaponIndex < 50) {
@@ -311,6 +329,7 @@
         }
     });
 
+    // 隨機附魔
     enchantBtn.addEventListener('click', () => {
         let enchantCost = weaponIndex * 100;
         if (score >= enchantCost) {
@@ -320,6 +339,7 @@
         }
     });
 
+    // 購買礦工
     minerBtn.addEventListener('click', () => {
         let minerCost = 75 + (miners * 45);
         if (score >= minerCost) {
@@ -329,8 +349,10 @@
         }
     });
 
+    // 礦工每秒自動加錢
     setInterval(() => { if (miners > 0) { score += miners; updateUI(); } }, 1000);
 
+    // 幸運大轉盤
     wheelBtn.addEventListener('click', () => {
         if (score >= 500) {
             score -= 500;
@@ -342,6 +364,7 @@
         }
     });
 
+    // 打包武器碼
     packBtn.addEventListener('click', () => {
         if (weaponIndex === 1 && enchantId === 0) return;
         let code = btoa(`${weaponIndex},${enchantId}`);
@@ -353,6 +376,7 @@
         });
     });
 
+    // 解包引進武器碼
     unpackBtn.addEventListener('click', () => {
         let code = marketInput.value.trim();
         if(!code) return;
@@ -368,6 +392,7 @@
         } catch(err) { alert("❌ 代碼錯誤"); }
     });
 
+    // 福利代碼
     giftBtn.addEventListener('click', () => {
         let code = giftInput.value.trim().toUpperCase();
         if (usedGiftCodes.includes(code)) return;
@@ -377,7 +402,7 @@
         updateUI();
     });
 
-    // ========== 管理員控制台邏輯 ==========
+    // ========== 管理員後台操控邏輯 ==========
     admWBtn.addEventListener('click', () => {
         let lv = parseInt(admWInput.value);
         if (lv >= 1 && lv <= 50) {
@@ -397,7 +422,7 @@
         if (!isNaN(targetCoin)) score = targetCoin;
         if (!isNaN(targetMiner)) miners = targetMiner;
         updateUI();
-        alert("🔱 數據強行改寫成功！");
+        alert("🔱 創世神數據改寫完畢！");
     });
 
     diyCodeBtn.addEventListener('click', () => {
@@ -411,276 +436,6 @@
         } else {
             alert("請輸入正確範圍（武器 1-50，附魔 0-51）");
         }
-    });
-
-    updateUI();
-</script>
-</body>
-</html>
-        
-        .input-group { display: flex; gap: 8px; margin-top: 8px; }
-        input[type="text"] { flex: 1; background: #030712; border: 1px solid #374151; border-radius: 8px; padding: 10px; color: #fff; font-size: 13px; text-align: center; outline: none; }
-        
-        .floating-num { position: absolute; font-weight: bold; font-size: 22px; color: #38bdf8; pointer-events: none; animation: floatUp 0.6s ease-out forwards; text-shadow: 0 2px 4px rgba(0,0,0,0.8); font-family: monospace; }
-        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-80px); } }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <div class="stat-card">
-        <div class="coin-title">GOLDEN COINS</div>
-        <div class="coin-count" id="score-display">0</div>
-        <div class="weapon-info" id="weapon-display">🗡️ 裝備：載入中...</div>
-        <div style="font-size: 12px; color: #a78bfa; margin-top: 4px;" id="enchant-display">✨ 附魔：無</div>
-    </div>
-
-    <div class="click-area" id="click-zone">
-        <div class="svg-sword-container" id="click-btn">
-            <svg viewBox="0 0 100 100" width="100%" height="100%" style="transform: rotate(45deg);">
-                <path d="M 45 8 C 45 8, 50 0, 55 8 L 55 65 L 45 65 Z" fill="#e2e8f0" />
-                <path d="M 25 65 C 35 60, 65 60, 75 65 L 70 72 L 30 72 Z" fill="#eab308" />
-                <rect x="44" y="72" width="12" height="20" rx="3" fill="#292524" />
-                <circle cx="50" cy="95" r="2" fill="#67e8f9" />
-            </svg>
-        </div>
-    </div>
-
-    <div class="panel">
-        <div class="panel-title">⚙️ 武器鍛造、附魔與自動化</div>
-        <div class="grid-2">
-            <button class="btn-upgrade" id="upgrade-btn">
-                <span>⚒️ 手動升級武器</span>
-                <span class="desc" id="upgrade-desc">花費 60</span>
-            </button>
-            <button class="btn-enchant" id="enchant-btn">
-                <span>🔥 隨機附魔</span>
-                <span class="desc" id="enchant-desc">花費 100</span>
-            </button>
-            <button class="btn-miner" id="miner-btn">
-                <span>⛏️ 僱用礦工</span>
-                <span class="desc" id="miner-desc">花費 75</span>
-            </button>
-            <button class="btn-wheel" id="wheel-btn">
-                <span>🎰 幸運大轉盤</span>
-                <span class="desc">花費 500</span>
-            </button>
-        </div>
-    </div>
-
-    <div class="panel">
-        <div class="panel-title">🏪 班級武器一對一交易市場</div>
-        <button style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);" id="pack-btn">📦 打包目前的武器為「交易碼」</button>
-        <div class="input-group">
-            <input type="text" id="market-input" placeholder="貼上同學給你的武器交易碼">
-            <button class="sm-btn" id="unpack-btn">解包引入</button>
-        </div>
-    </div>
-
-    <div class="panel">
-        <div class="panel-title">🎁 官方新手福利代碼</div>
-        <div class="input-group">
-            <input type="text" id="gift-input" placeholder="輸入官方福利碼">
-            <button class="sm-btn" id="gift-btn" style="background:#06b6d4;">領取</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    // 建立穩定的新儲存金鑰
-    const KEY_SCORE = 'v6_save_score';
-    const KEY_W_IDX = 'v6_save_w_idx';
-    const KEY_E_ID  = 'v6_save_e_id';
-    const KEY_MINER = 'v6_save_miners';
-    const KEY_GIFTS = 'v6_save_gifts';
-
-    // 【核心邏輯：自動吸取舊版一千六百萬存檔】
-    if (!localStorage.getItem(KEY_SCORE) && localStorage.getItem('all_score')) {
-        localStorage.setItem(KEY_SCORE, localStorage.getItem('all_score'));
-        localStorage.setItem(KEY_W_IDX, localStorage.getItem('all_w_idx') || 1);
-        localStorage.setItem(KEY_E_ID, localStorage.getItem('all_e_id') || 0);
-        localStorage.setItem(KEY_MINER, localStorage.getItem('all_miners') || 0);
-    }
-
-    let score = parseInt(localStorage.getItem(KEY_SCORE)) || 0;
-    let weaponIndex = parseInt(localStorage.getItem(KEY_W_IDX)) || 1;
-    let enchantId = parseInt(localStorage.getItem(KEY_E_ID)) || 0;
-    let miners = parseInt(localStorage.getItem(KEY_MINER)) || 0;
-    let usedGiftCodes = JSON.parse(localStorage.getItem(KEY_GIFTS)) || [];
-
-    // 50把武器
-    const weapons = [];
-    const prefix = ["新手", "精鋼", "淬火", "黑曜石", "寒冰", "烈焰", "雷霆", "破空", "聖光", "不滅"];
-    const wTypes = ["鐵劍", "長劍", "巨劍", "重劍", "太刀", "戰刃", "靈劍", "神劍"];
-    for(let i=1; i<=50; i++) {
-        if(i === 1) weapons.push({name: "破舊鐵劍", power: 1});
-        else if(i === 50) weapons.push({name: "🌌 宇宙終極不滅真神創世劍", power: 150000});
-        else {
-            let p = prefix[Math.floor((i/50)*prefix.length)];
-            let t = wTypes[Math.floor((i/80)*wTypes.length)];
-            weapons.push({name: `${p}之${t} Lv.${i}`, power: Math.floor(Math.pow(i, 2.8) + i * 5)});
-        }
-    }
-
-    // 附魔資料庫
-    const enchants = [{name: "無", multiply: 1.0, color: "#fff"}];
-    while(enchants.length < 51) {
-        let id = enchants.length;
-        enchants.push({ name: `神聖超頻 Tier ${id}`, multiply: 500 + (id * 150), color: "#c084fc" });
-    }
-    enchants.push({name: "🌈 全班我最帥", multiply: 100.0, color: "#f472b6"});
-
-    const scoreDisplay = document.getElementById('score-display');
-    const weaponDisplay = document.getElementById('weapon-display');
-    const enchantDisplay = document.getElementById('enchant-display');
-    const clickBtn = document.getElementById('click-btn');
-    const upgradeBtn = document.getElementById('upgrade-btn');
-    const upgradeDesc = document.getElementById('upgrade-desc');
-    const enchantBtn = document.getElementById('enchant-btn');
-    const enchantDesc = document.getElementById('enchant-desc');
-    const minerBtn = document.getElementById('miner-btn');
-    const minerDesc = document.getElementById('miner-desc');
-    const wheelBtn = document.getElementById('wheel-btn');
-    const packBtn = document.getElementById('pack-btn');
-    const marketInput = document.getElementById('market-input');
-    const unpackBtn = document.getElementById('unpack-btn');
-    const giftInput = document.getElementById('gift-input');
-    const giftBtn = document.getElementById('gift-btn');
-
-    function updateUI() {
-        scoreDisplay.innerText = Math.floor(score).toLocaleString();
-        weaponDisplay.innerText = `🗡️ 裝備：${weapons[weaponIndex - 1].name}`;
-        
-        let enc = enchants[enchantId];
-        enchantDisplay.innerText = `✨ 附魔：${enc.name} (倍率: x${enc.multiply})`;
-        enchantDisplay.style.color = enc.color;
-
-        if (weaponIndex < 50) {
-            let upgradeCost = weaponIndex * 60;
-            upgradeDesc.innerText = `花費 ${upgradeCost}`;
-            upgradeBtn.disabled = (score < upgradeCost);
-        } else {
-            upgradeBtn.innerHTML = "<span>⚡ 滿級 50 ⚡</span>";
-            upgradeBtn.disabled = true;
-        }
-
-        let enchantCost = weaponIndex * 100;
-        enchantDesc.innerText = `花費 ${enchantCost}`;
-        enchantBtn.disabled = (score < enchantCost);
-
-        let minerCost = 75 + (miners * 45);
-        minerDesc.innerText = `擁有: ${miners} | 花費 ${minerCost}`;
-        minerBtn.disabled = (score < minerCost);
-
-        wheelBtn.disabled = (score < 500);
-
-        // 即時寫入本地儲存，確保進度絕對不掉
-        localStorage.setItem(KEY_SCORE, score);
-        localStorage.setItem(KEY_W_IDX, weaponIndex);
-        localStorage.setItem(KEY_E_ID, enchantId);
-        localStorage.setItem(KEY_MINER, miners);
-        localStorage.setItem(KEY_GIFTS, JSON.stringify(usedGiftCodes));
-    }
-
-    function handleCoreClick(clientX, clientY) {
-        let totalPower = Math.floor(weapons[weaponIndex - 1].power * enchants[enchantId].multiply);
-        score += totalPower;
-
-        let num = document.createElement('div');
-        num.className = 'floating-num';
-        num.innerText = `+${totalPower}`;
-        num.style.left = `${clientX - 20}px`;
-        num.style.top = `${clientY - 40}px`;
-        document.body.appendChild(num);
-        setTimeout(() => num.remove(), 600);
-
-        updateUI();
-    }
-
-    clickBtn.addEventListener('touchstart', (e) => {
-        e.preventDefault(); 
-        let touch = e.touches[0];
-        handleCoreClick(touch.clientX, touch.clientY);
-    });
-
-    clickBtn.addEventListener('click', (e) => {
-        if (e.pointerType === 'touch') return;
-        handleCoreClick(e.clientX, e.clientY);
-    });
-
-    upgradeBtn.addEventListener('click', () => {
-        let upgradeCost = weaponIndex * 60;
-        if (score >= upgradeCost && weaponIndex < 50) {
-            score -= upgradeCost;
-            weaponIndex++;
-            updateUI();
-        }
-    });
-
-    enchantBtn.addEventListener('click', () => {
-        let enchantCost = weaponIndex * 100;
-        if (score >= enchantCost) {
-            score -= enchantCost;
-            enchantId = Math.floor(Math.random() * 50) + 1;
-            updateUI();
-        }
-    });
-
-    minerBtn.addEventListener('click', () => {
-        let minerCost = 75 + (miners * 45);
-        if (score >= minerCost) {
-            score -= minerCost;
-            miners++;
-            updateUI();
-        }
-    });
-
-    setInterval(() => { if (miners > 0) { score += miners; updateUI(); } }, 1000);
-
-    wheelBtn.addEventListener('click', () => {
-        if (score >= 500) {
-            score -= 500;
-            let rng = Math.random();
-            if (rng <= 0.01) { enchantId = 51; } 
-            else if (rng <= 0.20) { weaponIndex = Math.min(50, weaponIndex + 3); } 
-            else { score += 1000; }
-            updateUI();
-        }
-    });
-
-    packBtn.addEventListener('click', () => {
-        if (weaponIndex === 1 && enchantId === 0) return;
-        let code = btoa(`${weaponIndex},${enchantId}`);
-        navigator.clipboard.writeText(code).then(() => {
-            alert(`📦 交易碼已複製：${code}`);
-            weaponIndex = 1;
-            enchantId = 0;
-            updateUI();
-        });
-    });
-
-    unpackBtn.addEventListener('click', () => {
-        let code = marketInput.value.trim();
-        if(!code) return;
-        try {
-            let decoded = atob(code);
-            let parts = decoded.split(',');
-            if(parts.length === 2) {
-                weaponIndex = parseInt(parts[0]);
-                enchantId = parseInt(parts[1]);
-                marketInput.value = "";
-                updateUI();
-            }
-        } catch(err) { alert("❌ 代碼錯誤"); }
-    });
-
-    giftBtn.addEventListener('click', () => {
-        let code = giftInput.value.trim().toUpperCase();
-        if (usedGiftCodes.includes(code)) return;
-        if (code === "SWORD10") { weaponIndex = Math.max(weaponIndex, 10); usedGiftCodes.push(code); } 
-        else if (code === "LEGEND50") { weaponIndex = 50; enchantId = 50; usedGiftCodes.push(code); }
-        giftInput.value = "";
-        updateUI();
     });
 
     updateUI();
