@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>不滅神劍：宇宙終極全民市場版</title>
+    <style>
+        body { margin: 0; background: #0b0c10; color: #c5c6c7; display: flex; flex-direction: column; align-items: center; min-height: 100vh; font-family: 'Segoe UI', sans-serif; user-select: none; padding: 15px; box-sizing: border-box; }
+        .container { text-align: center; width: 100%; max-width: 420px; }
+        
+        /* 狀態面板 */
+        .header-box { background: #1f2833; padding: 12px; border-radius: 12px; border: 1px solid #45f3ff33; margin-bottom: 10px; position: relative; }
+        #score-board { font-size: 26px; color: #45f3ff; font-weight: bold; text-shadow: 0 0 10px rgba(69,243,255,0.3); }
+        #weapon-status, #enchant-status, #dps-status { font-size: 14px; margin-top: 4px; color: #66fcf1; }
+        #enchant-status { color: #ff007f; font-weight: bold; }
+        #dps-status { color: #00ffcc; }
+
+        /* Boss 突襲區域 */
+        #boss-zone { display: none; background: linear-gradient(45deg, #8b0000, #ff0000); border-radius: 10px; padding: 10px; margin: 10px 0; box-shadow: 0 0 20px #ff0000; animation: flash 1s infinite alternate; }
+        #boss-hp-bar { width: 100%; bg: #333; background-color: #222; border-radius: 5px; height: 15px; overflow: hidden; margin-top: 5px; border: 1px solid #fff; }
+        #boss-hp-fill { width: 100%; height: 100%; background: #ffcc00; transition: width 0.1s; }
+
+        /* 核心點擊按鈕（劍） */
+        .click-area { height: 160px; display: flex; align-items: center; justify-content: center; margin: 10px 0; }
+        #click-btn { 
+            width: 120px; height: 120px; background: #1f2833; 
+            border: 4px solid #66fcf1; border-radius: 50%; 
+            font-size: 60px; color: white; cursor: pointer; 
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.1s ease;
+            box-shadow: 0 0 15px #66fcf1;
+        }
+        #click-btn:active { transform: scale(0.85); }
+
+        /* 控制面板 */
+        .panel { background: #11141a; border-radius: 12px; padding: 15px; margin-top: 12px; border: 1px solid #232931; text-align: left; }
+        .panel h3 { margin: 0 0 10px 0; color: #66fcf1; font-size: 15px; display: flex; justify-content: space-between; }
+        
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+        button.main-btn { padding: 10px; border: none; border-radius: 8px; color: white; font-weight: bold; font-size: 13px; cursor: pointer; }
+        .btn-full { grid-column: span 2; }
+        .btn-upgrade { background: linear-gradient(45deg, #00b4db, #0083b0); }
+        .btn-enchant { background: linear-gradient(45deg, #ff007f, #7928ca); }
+        .btn-miner { background: linear-gradient(45deg, #ffaa00, #885500); }
+        .btn-wheel { background: linear-gradient(45deg, #4caf50, #2e7d32); }
+        .btn-market { background: linear-gradient(45deg, #0070f3, #00dfd8); }
+        button:disabled { background: #222 !important; color: #555 !important; box-shadow: none !important; cursor: not-allowed; }
+
+        /* 輸入框與複製區 */
+        .input-group { display: flex; gap: 5px; margin-top: 8px; }
+        input { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #45f3ff; background: #0b0c10; color: white; text-align: center; font-size: 13px; }
+        button.sm-btn { padding: 8px 12px; background: #45f3ff; color: #0b0c10; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; }
+        
+        .hint { font-size: 11px; color: #888; margin-top: 5px; line-height: 1.3; }
+        .code-display { background: #000; padding: 8px; border-radius: 6px; color: #ff007f; font-family: monospace; font-size: 12px; word-break: break-all; margin-top: 6px; border: 1px dashed #ff007f; display: none; user-select: all; -webkit-user-select: all; }
+        
+        @keyframes flash { from { opacity: 1; } to { opacity: 0.8; } }
+        @keyframes rainbow { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header-box">
+            <div id="score-board">💰 金幣: <span id="score">0</span></div>
+            <div id="weapon-status">裝備：新手木劍 (第 1 / 50 把)</div>
+            <div id="enchant-status">附魔：無屬性</div>
+            <div id="dps-status">⛏️ 自動挖礦：0 金幣/秒</div>
+        </div>
+
+        <div id="boss-zone">
+            <div style="font-weight: bold; color: #fff;" id="boss-title">🚨 BOSS 突襲：野生的班導師出現了！</div>
+            <div style="font-size: 12px; color: #fff;" id="boss-timer">剩餘時間: 20 秒</div>
+            <div id="boss-hp-bar"><div id="boss-hp-fill"></div></div>
+        </div>
+        
+        <div class="click-area">
+            <button id="click-btn">⚔️</button>
+        </div>
+        
+        <div class="panel">
+            <h3>⚙️ 武器鍛造、附魔與自動化</h3>
+            <div class="btn-grid">
+                <button class="main-btn btn-upgrade" id="upgrade-btn">⚒️ 手動升級武器 (60)</button>
+                <button class="main-btn btn-enchant" id="enchant-btn">🔥 隨機附魔 (100)</button>
+                <button class="main-btn btn-miner" id="miner-btn">⛏️ 僱用矮人礦工 (50)</button>
+                <button class="main-btn btn-wheel" id="wheel-btn">🎰 幸運大轉盤 (500)</button>
+            </div>
+            <div class="hint">💡 轉盤有 1% 機率抽到隱藏第 51 種【全班我最帥】附魔，金幣暴擊 100 倍且帶有彩虹極光特效！支援離線掛機收益。</div>
+        </div>
+
+        <div class="panel" style="border-color: #0070f3;">
+            <h3>🏪 班級武器一對一交易市場</h3>
+            <button class="main-btn btn-market btn-full" id="pack-btn">📦 將目前的武器與附魔打包成「交易碼」</button>
+            <div class="code-display" id="generated-code-box">點擊上方打包生成交易碼</div>
+            
+            <div class="input-group">
+                <input type="text" id="market-input" placeholder="貼上同學給你的武器交易碼">
+                <button class="sm-btn" id="unpack-btn">解包引入</button>
+            </div>
+            <div class="hint">⚠️ 打包會把你目前的劍與附魔變成代碼，**同時你手上的武器會被扣除重置**。同學引入解包後，就能完全繼承你的神兵利器！</div>
+        </div>
+
+        <div class="panel">
+            <h3>🎁 官方新手福利代碼</h3>
+            <div class="input-group">
+                <input type="text" id="gift-input" placeholder="輸入官方福利碼 (如: SWORD10)">
+                <button class="sm-btn" id="gift-btn">領取</button>
+            </div>
+            <div class="hint">福利碼：<span style="color:#45f3ff">SWORD10</span> (第10把劍) | <span style="color:#45f3ff">LEGEND50</span> (滿級神劍) (限領一次)</div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. 數據初始化與離線掛機計算 ---
+        let score = parseInt(localStorage.getItem('all_score')) || 0;
+        let weaponIndex = parseInt(localStorage.getItem('all_w_idx')) || 1; 
+        let enchantId = parseInt(localStorage.getItem('all_e_id')) || 0; 
+        let miners = parseInt(localStorage.getItem('all_miners')) || 0;
+        let usedGiftCodes = JSON.parse(localStorage.getItem('all_used_gifts')) || [];
+        let lastSaveTime = parseInt(localStorage.getItem('all_last_time')) || Date.now();
+
+        // 50把武器生成
+        const weapons = [];
+        for (let i = 1; i <= 50; i++) {
+            let name = `傳奇之劍 Lv.${i}`;
+            if (i === 1) name = "🪵 新手木劍";
+            if (i === 2) name = "🗡️ 鐵製短劍";
+            if (i === 50) name = "👑 終極終焉神劍";
+            weapons.push({ name: name, power: i * 2 });
+        }
+
+        // 51種附魔資料庫
+        const enchants = { 0: { name: "無屬性", style: "border: 4px solid #66fcf1; box-shadow: 0 0 15px #66fcf1; transform: none;", multiply: 1 } };
+        const enchantNames = [
+            "烈焰", "寒冰", "閃電", "劇毒", "風暴", "聖光", "暗影", "大地", "熔岩", "海嘯",
+            "紅寶石", "藍寶石", "翡翠", "紫水晶", "琥珀", "鑽石", "黑曜石", "貓眼石", "鈦金", "振金",
+            "星空", "黑洞", "彗星", "超新星", "星雲", "銀河", "脈衝", "日冕", "月蝕", "量子",
+            "天神", "墮天使", "奧丁", "宙斯", "阿修羅", "死神", "鳳凰", "巨龍", "九尾狐", "麒麟",
+            "虛空", "湮滅", "終焉", "創世", "因果", "時之砂", "空間裂縫", "維度崩塌", "太混沌", "不滅之兆"
+        ];
+
+        // 動態生成前 50 種附魔樣式
+        for(let i = 1; i <= 50; i++) {
+            let name = enchantNames[i-1];
+            let style = "";
+            let multiply = 1 + (i * 0.5);
+
+            if(i <= 10) { 
+                let colors = ["#ff4500", "#00ffff", "#ffff00", "#00ff00", "#a9a9a9", "#fff0f5", "#4b0082", "#8b4513", "#ff8c00", "#1e90ff"];
+                style = `border: 5px solid ${colors[i-1]}; box-shadow: 0 0 25px ${colors[i-1]}; font-size: 75px;`;
+            } else if(i <= 20) { 
+                let hue = (i * 35) % 360;
+                style = `border: 6px double hsl(${hue}, 100%, 50%); box-shadow: 0 0 30px hsl(${hue}, 100%, 40%), inset 0 0 15px hsl(${hue}, 100%, 60%); border-radius: 40%;`;
+            } else if(i <= 30) { 
+                let size = 65 + (i % 3) * 5;
+                style = `border: 5px dashed #fff; background: #000; box-shadow: 0 0 35px #7928ca; font-size: ${size}px; animation: pulse 1s infinite alternate;`;
+            } else if(i <= 40) { 
+                let hue = (i * 72) % 360;
+                style = `border: 6px ridge hsl(${hue}, 100%, 50%); box-shadow: 0 0 15px #fff, 0 0 30px hsl(${hue}, 100%, 50%), 0 0 50px #ff007f; text-shadow: 0 0 10px #fff;`;
+            } else { 
+                style = `border: 6px solid #fff; background: linear-gradient(45deg, #ff007f, #00dfd8); box-shadow: 0 0 40px #ff007f, 0 0 70px #00dfd8; transform: rotate(${(i-40)*9}deg); border-radius: 20%;`;
+            }
+            enchants[i] = { name: `【${name}】(金幣 x${multiply.toFixed(1)})`, style: style, multiply: multiply };
+        }
+
+        // 特別追加：第 51 種抽獎專屬彩虹隱藏附魔
+        enchants[51] = {
+            name: `🌟【全班我最帥・終極極光】(金幣 x100.0) 🌟`,
+            style: `border: 6px solid #fff; background: linear-gradient(270deg, #ff0000, #00ff00, #0000ff, #ffff00, #ff00ff, #00ffff); background-size: 400% 400%; animation: rainbow 2s ease infinite, pulse 0.5s infinite alternate; box-shadow: 0 0 50px #fff, 0 0 100px #ff00ff; font-size: 80px;`,
+            multiply: 100
+        };
+
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = `@keyframes pulse { from { transform: scale(1); } to { transform: scale(1.06); } }`;
+        document.head.appendChild(styleSheet);
+
+        const GIFT_CODES = { "SWORD10": 10, "LEGEND50": 50 };
+
+        // Boss 變數
+        let isBossActive = false;
+        let bossHp = 0;
+        let bossMaxHp = 0;
+        let bossTimeLeft = 0;
+        let bossTimerInterval, bossSpawnTimeout;
+
+        // DOM 擷取
+        const scoreEl = document.getElementById('score');
+        const weaponStatusEl = document.getElementById('weapon-status');
+        const enchantStatusEl = document.getElementById('enchant-status');
+        const dpsStatusEl = document.getElementById('dps-status');
+        const clickBtn = document.getElementById('click-btn');
+        const upgradeBtn = document.getElementById('upgrade-btn');
+        const enchantBtn = document.getElementById('enchant-btn');
+        const minerBtn = document.getElementById('miner-btn');
+        const wheelBtn = document.getElementById('wheel-btn');
+        const packBtn = document.getElementById('pack-btn');
+        const generatedCodeBox = document.getElementById('generated-code-box');
+        const marketInput = document.getElementById('market-input');
+        const unpackBtn = document.getElementById('unpack-btn');
+        const giftInput = document.getElementById('gift-input');
+        const giftBtn = document.getElementById('gift-btn');
+        
+        const bossZone = document.getElementById('boss-zone');
+        const bossTitle = document.getElementById('boss-title');
+        const bossTimer = document.getElementById('boss-timer');
+        const bossHpFill = document.getElementById('boss-hp-fill');
+
+        // --- 計算離線自動掛機收益 ---
+        let currentTime = Date.now();
+        let timePassedSeconds = Math.floor((currentTime - lastSaveTime) / 1000);
+        if (timePassedSeconds > 5 && miners > 0) {
+            let offlineDps = miners * 2;
+            let offlineEarnings = timePassedSeconds * offlineDps;
+            score += offlineEarnings;
+            alert(`💤 歡迎回來！你在離線掛機的 ${timePassedSeconds} 秒內，矮人礦工為你辛勤挖到了 ${offlineEarnings} 金幣！`);
+        }
+
+        // --- 2. 核心渲染功能 ---
+        function updateUI() {
+            scoreEl.textContent = Math.floor(score);
+            const currentWeapon = weapons[weaponIndex - 1];
+            const currentEnchant = enchants[enchantId];
+            let totalPower = Math.floor(currentWeapon.power * currentEnchant.multiply);
+            
+            weaponStatusEl.textContent = `裝備：${currentWeapon.name} (基礎 +${currentWeapon.power})`;
+            enchantStatusEl.textContent = `附魔：${currentEnchant.name} ➔ 每擊威力: +${totalPower}`;
+            dpsStatusEl.textContent = `⛏️ 自動挖礦：${miners * 2} 金幣/秒 (擁有 ${miners} 名礦工)`;
+            
+            clickBtn.style = currentEnchant.style;
+
+            // 升級武器按鈕控制
+            if (weaponIndex < 50) {
+                let upgradeCost = weaponIndex * 60;
+                upgradeBtn.textContent = `⚒️ 手動升級武器 (花費 ${upgradeCost})`;
+                upgradeBtn.disabled = (score < upgradeCost);
+            } else {
+                upgradeBtn.textContent = `⚡ 武器已達最高級 50 ⚡`;
+                upgradeBtn.disabled = true;
+            }
+
+            // 附魔、礦工、轉盤按鈕控制
+            let enchantCost = weaponIndex * 100;
+            enchantBtn.textContent = `🔥 隨機附魔 (${enchantCost})`;
+            enchantBtn.disabled = (score < enchantCost);
+
+            let minerCost = 50 + (miners * 25);
+            minerBtn.textContent = `⛏️ 僱用礦工 (${minerCost})`;
+            minerBtn.disabled = (score < minerCost);
+
+            wheelBtn.disabled = (score < 500);
+
+            // 定時將最新的時間儲存，供離線掛機計算
+            localStorage.setItem('all_score', score);
+            localStorage.setItem('all_w_idx', weaponIndex);
+            localStorage.setItem('all_e_id', enchantId);
+            localStorage.setItem('all_miners', miners);
+            localStorage.setItem('all_used_gifts', JSON.stringify(usedGiftCodes));
+            localStorage.setItem('all_last_time', Date.now());
+        }
+
+        // 每秒執行一次的自動挖礦
+        setInterval(() => {
+            if (miners > 0) {
+                score += miners * 2;
+                updateUI();
+            }
+        }, 1000);
+
+        // --- 3. 遊戲核心點擊與按鈕操作 ---
+        clickBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            let totalPower = Math.floor(weapons[weaponIndex - 1].power * enchants[enchantId].multiply);
+            
+            if (isBossActive) {
+                bossHp -= totalPower;
+                if (bossHp <= 0) {
+                    bossHp = 0;
+                    winBoss();
+                }
+                bossHpFill.style.width = `${(bossHp / bossMaxHp) * 100}%`;
+            } else {
+                score += totalPower;
+            }
+            updateUI();
+        });
+
+        // 手動升級武器
+        upgradeBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (weaponIndex < 50) {
+                let upgradeCost = weaponIndex * 60;
+                if (score >= upgradeCost) {
+                    score -= upgradeCost;
+                    weaponIndex++;
+                    alert(`🎉 鍛造成功！升級為【${weapons[weaponIndex-1].name}】！`);
+                    updateUI();
+                }
+            }
+        });
+
+        // 購買隨機附魔 (1~50種)
+        enchantBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            let enchantCost = weaponIndex * 100;
+            if (score >= enchantCost) {
+                score -= enchantCost;
+                enchantId = Math.floor(Math.random() * 50) + 1;
+                alert(`✨ 附魔成功！獲得：${enchants[enchantId].name}`);
+                updateUI();
+            }
+        });
+
+        // 僱用矮人礦工
+        minerBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            let minerCost = 50 + (miners * 25);
+            if (score >= minerCost) {
+                score -= minerCost;
+                miners++;
+                alert(`⛏️ 招募成功！自動產金效率提升！`);
+                updateUI();
+            }
+        });
+
+        // 幸運大轉盤 (消耗 500)
+        wheelBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (score >= 500) {
+                score -= 500;
+                let rand = Math.random() * 100;
+                if (rand < 1) { // 1% 機率抽到隱藏彩虹
+                    enchantId = 51;
+                    alert(`🌈【天選之人】!!! 你抽中了機率只有 1% 的至高隱藏附魔：\n${enchants[51].name}！！！`);
+                } else if (rand < 15) { // 14% 直接獲得更高級武器
+                    if (weaponIndex < 45) {
+                        weaponIndex += 5;
+                        alert(`🎰 轉盤大狂飆！武器直接保送暴升 5 級！`);
+                    } else {
+                        score += 5000;
+                        alert(`🎰 轉盤抽中武器升級，但你等級太高，補償 5000 金幣！`);
+                    }
+                } else if (rand < 50) { // 35% 獲得大額金幣
+                    score += 1500;
+                    alert(`🎰 轉盤轉到金幣福袋！獲得 1500 金幣！`);
+                } else {
+                    alert(`🎰 轉盤轉到空氣！獲得「安慰獎 50 金幣」！`);
+                    score += 50;
+                }
+                updateUI();
+            }
+        });
+
+        // --- 4. 交易市場：打包/解包防作弊碼 ---
+        packBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (weaponIndex === 1 && enchantId === 0) {
+                alert("❌ 你目前只有木劍且無附魔，無法打包！");
+                return;
+            }
+            if(confirm("⚠️ 確定打包嗎？這會變成交易碼，且你手上的武器與附魔會立刻歸零重置！")) {
+                let checksum = (weaponIndex * 7 + enchantId * 13) % 100;
+                let tradeCode = `MKT-${weaponIndex}X${enchantId}Z${checksum}`;
+                generatedCodeBox.textContent = tradeCode;
+                generatedCodeBox.style.display = "block";
+                
+                weaponIndex = 1;
+                enchantId = 0;
+                alert("📦 打包成功！紅字為交易碼，請複製傳給同學。你自己的武器已重置流向市場！");
+                updateUI();
+            }
+        });
+
+        unpackBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            let code = marketInput.value.trim().toUpperCase();
+            if(!code.startsWith("MKT-")) { alert("❌ 錯誤：這不是合法的武器市場交易碼！"); return; }
+            try {
+                let parts = code.replace("MKT-", "").split(/[XZ]/);
+                let incomingWeapon = parseInt(parts[0]);
+                let incomingEnchant = parseInt(parts[1]);
+                let incomingCheck = parseInt(parts[2]);
+
+                if ((incomingWeapon * 7 + incomingEnchant * 13) % 100 !== incomingCheck) {
+                    alert("❌ 檢測到非法交易！此代碼已被竄改作弊！");
+                    return;
+                }
+
+                weaponIndex = incomingWeapon;
+                enchantId = incomingEnchant;
+                marketInput.value = "";
+                alert(`🤝 引入成功！獲得：\n武器：${weapons[weaponIndex-1].name}\n附魔：${enchants[enchantId].name}`);
+                updateUI();
+            } catch(err) { alert("❌ 解析失敗，請確認代碼完整度！"); }
+        });
+
+        // --- 5. 官方福利碼 ---
+        giftBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            let code = giftInput.value.trim().toUpperCase();
+            if (usedGiftCodes.includes(code)) { alert("❌ 此福利代碼你已經領取過了！"); giftInput.value = ""; return; }
+            if (code in GIFT_CODES) {
+                weaponIndex = GIFT_CODES[code];
+                usedGiftCodes.push(code);
+                giftInput.value = "";
+                alert(`🎁 福利碼成功解鎖第 ${weaponIndex} 把神劍！`);
+                updateUI();
+            } else { alert("❌ 找不到此官方代碼。"); }
+        });
+
+        // --- 6. 限時 Boss 突襲系統 ---
+        const bossNames = ["野生的隔壁班長", "憤怒的班導師", "訓導主任的幻影", "福利社阿姨大魔王", "終極期末考考卷"];
+        function spawnBoss() {
+            if (isBossActive) return;
+            isBossActive = true;
+            bossMaxHp = weaponIndex * 150 + 200;
+            bossHp = bossMaxHp;
+            bossTimeLeft = 20;
+
+            let randName = bossNames[Math.floor(Math.random() * bossNames.length)];
+            bossTitle.textContent = `🚨 BOSS 突襲：${randName}！`;
+            bossTimer.textContent = `剩餘時間: ${bossTimeLeft} 秒`;
+            bossHpFill.style.width = "100%";
+            bossZone.style.display = "block";
+
+            // 倒數計時
+            bossTimerInterval = setInterval(() => {
+                bossTimeLeft--;
+                bossTimer.textContent = `剩餘時間: ${bossTimeLeft} 秒`;
+                if (bossTimeLeft <= 0) {
+                    endBoss(false);
+                }
+            }, 1000);
+        }
+
+        function endBoss(isDead) {
+            clearInterval(bossTimerInterval);
+            bossZone.style.display = "none";
+            isBossActive = false;
+            if (!isDead) {
+                alert("💨 倒數結束，Boss 拍拍屁股逃跑了！下次抓緊時間點擊！");
+            }
+            // 隨機在 45~75 秒後刷新下一隻
+            let nextSpawnTime = (Math.floor(Math.random() * 30) + 45) * 1000;
+            bossSpawnTimeout = setTimeout(spawnBoss, nextSpawnTime);
+        }
+
+        function winBoss() {
+            let reward = weaponIndex * 350 + 500;
+            score += reward;
+            alert(`⚔️ 成功擊殺 Boss !!! 全班歡呼！\n獲得高額擊殺懸賞金：+${reward} 金幣！`);
+            endBoss(true);
+        }
+
+        // 開機 30 秒後首次觸發 Boss 突襲
+        bossSpawnTimeout = setTimeout(spawnBoss, 30000);
+
+        // 滑鼠相容
+        const btns = [clickBtn, upgradeBtn, enchantBtn, minerBtn, wheelBtn, packBtn, unpackBtn, giftBtn];
+        btns.forEach(b => b.addEventListener('mousedown', () => { if (!('ontouchstart' in window)) b.click(); }));
+
+        updateUI();
+    </script>
+</body>
+</html>
+
