@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>不滅神劍：全民市場純淨版</title>
+    <title>不滅神劍：全民市場完美繼承版</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
         body { background: #0a0e17; color: #fff; font-family: sans-serif; padding: 15px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
@@ -48,7 +48,7 @@
     <div class="stat-card">
         <div class="coin-title">GOLDEN COINS</div>
         <div class="coin-count" id="score-display">0</div>
-        <div class="weapon-info" id="weapon-display">🗡️ 裝備：破舊鐵劍 (Lv.1)</div>
+        <div class="weapon-info" id="weapon-display">🗡️ 裝備：載入中...</div>
         <div style="font-size: 12px; color: #a78bfa; margin-top: 4px;" id="enchant-display">✨ 附魔：無</div>
     </div>
 
@@ -83,7 +83,6 @@
                 <span class="desc">花費 500</span>
             </button>
         </div>
-        <div class="notice-text">💡 轉盤有 1% 機率抽到隱藏第 51 種【全班我最帥】附魔，金幣暴擊 100倍！</div>
     </div>
 
     <div class="panel">
@@ -105,12 +104,20 @@
 </div>
 
 <script>
-    // 終極防快取覆蓋全新金鑰
-    const KEY_SCORE = 'v5_pure_score';
-    const KEY_W_IDX = 'v5_pure_w_idx';
-    const KEY_E_ID  = 'v5_pure_e_id';
-    const KEY_MINER = 'v5_pure_miners';
-    const KEY_GIFTS = 'v5_pure_gifts';
+    // 建立穩定的新儲存金鑰
+    const KEY_SCORE = 'v6_save_score';
+    const KEY_W_IDX = 'v6_save_w_idx';
+    const KEY_E_ID  = 'v6_save_e_id';
+    const KEY_MINER = 'v6_save_miners';
+    const KEY_GIFTS = 'v6_save_gifts';
+
+    // 【核心邏輯：自動吸取舊版一千六百萬存檔】
+    if (!localStorage.getItem(KEY_SCORE) && localStorage.getItem('all_score')) {
+        localStorage.setItem(KEY_SCORE, localStorage.getItem('all_score'));
+        localStorage.setItem(KEY_W_IDX, localStorage.getItem('all_w_idx') || 1);
+        localStorage.setItem(KEY_E_ID, localStorage.getItem('all_e_id') || 0);
+        localStorage.setItem(KEY_MINER, localStorage.getItem('all_miners') || 0);
+    }
 
     let score = parseInt(localStorage.getItem(KEY_SCORE)) || 0;
     let weaponIndex = parseInt(localStorage.getItem(KEY_W_IDX)) || 1;
@@ -118,6 +125,7 @@
     let miners = parseInt(localStorage.getItem(KEY_MINER)) || 0;
     let usedGiftCodes = JSON.parse(localStorage.getItem(KEY_GIFTS)) || [];
 
+    // 50把武器
     const weapons = [];
     const prefix = ["新手", "精鋼", "淬火", "黑曜石", "寒冰", "烈焰", "雷霆", "破空", "聖光", "不滅"];
     const wTypes = ["鐵劍", "長劍", "巨劍", "重劍", "太刀", "戰刃", "靈劍", "神劍"];
@@ -131,6 +139,7 @@
         }
     }
 
+    // 附魔資料庫
     const enchants = [{name: "無", multiply: 1.0, color: "#fff"}];
     while(enchants.length < 51) {
         let id = enchants.length;
@@ -182,6 +191,7 @@
 
         wheelBtn.disabled = (score < 500);
 
+        // 即時寫入本地儲存，確保進度絕對不掉
         localStorage.setItem(KEY_SCORE, score);
         localStorage.setItem(KEY_W_IDX, weaponIndex);
         localStorage.setItem(KEY_E_ID, enchantId);
@@ -294,3 +304,4 @@
 </script>
 </body>
 </html>
+
